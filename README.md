@@ -1,5 +1,8 @@
 This is the Fortran source code in the Julia package [FuzzifiED](https://github.com/FuzzifiED/FuzzifiED.jl) intended for exact diagonalisation (ED) calculations on fuzzy sphere. 
 
-If you want to compile this code yourself for the use of FuzzifiED, please refer to `build_here.sh`. If you use 32-bits version of Arpack, remove  `-fdefault-integer-8` from `FFLAGS`. If you are not using Linux, change `.so` to `.dylib` or `.ddl`. When running the Julia code of FuzzifiED, the directory of the compiled dynamic library need to be stored into the environment variables `FuzzifiED.Libpath` and `FuzzifiED.Fuzzifino.Libpathino`. 
+The code can be compiled by `make`. Three options are required : 
+- `LIB_DIR` : the directory of the product libraries, `.` by default ; 
+- `DLEXT` : the extension of the shared library on the target system, `so` for Linux (by default), `dll` for Windows, and `dylib` for macOS ;
+- `NBITS` : the number of bits of the target architecture, `64` (by default) or `32`. 
 
 This package is developed by Zheng Zhou (周正) and contributors. If you have any questions, please contact [fuzzified@zhengzhou.page](mailto:fuzzified@zhengzhou.page).

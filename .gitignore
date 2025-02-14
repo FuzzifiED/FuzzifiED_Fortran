@@ -1,6 +1,5 @@
 build/
 products/
-lib/
 .vscode/
 **.mod
 **.o

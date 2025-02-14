@@ -4,29 +4,17 @@
 using BinaryBuilder, Pkg
 
 name = "FuzzifiED"
-version = v"0.10.7"
+version = v"1.0.0"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/FuzzifiED/FuzzifiED_Fortran.git", "609e62daae434d90795b4ff77f5e09f56a4d0774")
+    GitSource("https://github.com/FuzzifiED/FuzzifiED_Fortran.git", "29b9cbc1ab9a847ad02797b08e6705ede1c38070")
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir/FuzzifiED_Fortran/src/
-FFLAGS=(-O3 -fPIC -fopenmp)
-if [[ ${nbits} == 64 ]]; then
-    FFLAGS+=(-fdefault-integer-8)
-fi
-for src in cfs.f90 bs.f90 op.f90 diag.f90 diag_re.f90 ent.f90; do
-    gfortran "${FFLAGS[@]}" -c ./${src}
-done
-gfortran "${FFLAGS[@]}" -shared -o "${libdir}/libfuzzified.${dlext}" ./*.o -L "${libdir}" -larpack
-cd super
-for src in scfs.f90 sbs.f90 sop.f90 sent.f90; do
-    gfortran "${FFLAGS[@]}" -c ./${src}
-done
-gfortran "${FFLAGS[@]}" -shared -o "${libdir}/libfuzzifino.${dlext}" ./*.o
+cd $WORKSPACE/srcdir/FuzzifiED_Fortran/
+make DLEXT=${dlext} LIB_DIR=${libdir} NBITS=${nbits}
 """
 
 # These are the platforms we will build for by default, unless further
