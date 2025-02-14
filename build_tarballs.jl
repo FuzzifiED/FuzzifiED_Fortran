@@ -1,4 +1,3 @@
-# ~/Téléchargements/julia-1.7.3/bin/julia build_tarballs.jl --debug --verbose --deploy="FuzzifiED/FuzzifiED_jll.jl"
 # Note that this script can accept some limited command-line arguments, run
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder, Pkg
@@ -8,7 +7,7 @@ version = v"1.0.0"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/FuzzifiED/FuzzifiED_Fortran.git", "29b9cbc1ab9a847ad02797b08e6705ede1c38070")
+    GitSource("https://github.com/FuzzifiED/FuzzifiED_Fortran.git", "a81b1fa6b1560ab0046ec139dec0d0d355e56b34")
 ]
 
 # Bash recipe for building across all platforms
@@ -19,7 +18,7 @@ make DLEXT=${dlext} LIB_DIR=${libdir} NBITS=${nbits}
 
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
-platforms = expand_gfortran_versions(supported_platforms(exclude = p -> arch(p) == "aarch64" && os(p) == "freebsd"))
+platforms = expand_gfortran_versions(supported_platforms(exclude = [Platform("aarch64", "freebsd"), Platform("riscv64", "linux")]))
 
 # The products that we will ensure are always built
 products = [
