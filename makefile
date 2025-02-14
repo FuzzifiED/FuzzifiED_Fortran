@@ -3,6 +3,7 @@ SUPER_DIR := $(SRC_DIR)/super
 FC := gfortran
 NBITS ?= 64
 DLEXT ?= so
+LIB_DIR ?= .
 
 FFLAGS := -O3 -fPIC -fopenmp
 ifeq ($(NBITS), 64)
