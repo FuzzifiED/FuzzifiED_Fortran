@@ -5,4 +5,4 @@ The code can be compiled by `make`. Three options are required :
 - `DLEXT` : the extension of the shared library on the target system, `so` for Linux (by default), `dll` for Windows, and `dylib` for macOS ;
 - `NBITS` : the number of bits of the target architecture, `64` (by default) or `32`. 
 
-This package is developed by Zheng Zhou (周正) and contributors. If you have any questions, please contact [fuzzified@zhengzhou.page](mailto:fuzzified@zhengzhou.page).
+This package is developed by Zheng Zhou (周正) and contributors. If you have any questions, please contact [physics@zhengzhou.page](mailto:physicsd@zhengzhou.page).
