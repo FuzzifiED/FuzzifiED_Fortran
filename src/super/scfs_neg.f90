@@ -1,8 +1,8 @@
-module scfs 
+module scfs_neg
     
 contains 
 
-subroutine count_scfs(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob, modul, ncf, lid, binom, num_th, disp_std)
+subroutine count_scfs_neg(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob, modul, ncf, lid, binom, num_th, disp_std)
     use omp_lib
     implicit none
     integer(8), intent(in) :: nof, nob, norf, norb, nebm, nqnu
@@ -36,7 +36,7 @@ subroutine count_scfs(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob, m
             qnu_1 = qnu_1 - qnu_ob(j, :) * nb1(j - norb)
         end do
         lid(i + 2) = 0
-        call count_scfs_rec(nof, nob, norf, norb, nqnu, qnu_1, qnu_of, qnu_ob, modul, lid(i + 2))
+        call count_scfs_neg_rec(nof, nob, norf, norb, nqnu, qnu_1, qnu_of, qnu_ob, modul, lid(i + 2))
     end do
     !$omp end do
     !$omp end parallel
@@ -48,7 +48,7 @@ subroutine count_scfs(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob, m
     if (disp_std == 1) print *, 'Counting configurations finish, total number :', ncf
 end subroutine
 
-recursive subroutine count_scfs_rec(nof, nob, nomf, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ct)
+recursive subroutine count_scfs_neg_rec(nof, nob, nomf, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ct)
     implicit none
     integer(8), intent(in) :: nof, nob, nomf, nomb, nqnu
     integer(8), intent(in) :: qnu_1(nqnu), qnu_of(nof, nqnu), qnu_ob(nob, nqnu), modul(nqnu)
@@ -62,20 +62,19 @@ recursive subroutine count_scfs_rec(nof, nob, nomf, nomb, nqnu, qnu_1, qnu_of, q
         if (cyc1 == 1 .and. qnu_1(i) == 0) cycle
         if (cyc1 > 1 .and. mod(qnu_1(i), cyc1) == 0) cycle
         flag = .false.
-        if (cyc1 == 1 .and. qnu_1(i) < 0) return
     end do
     if (flag) ct = ct + 1 
     
     if (nomf > 0) then 
         do nomf1 = 1, nomf
-            call count_scfs_rec(nof, nob, nomf1 - 1, nomb, nqnu, qnu_1 - qnu_of(nomf1, :), qnu_of, qnu_ob, modul, ct) ! fermion at nomf1
+            call count_scfs_neg_rec(nof, nob, nomf1 - 1, nomb, nqnu, qnu_1 - qnu_of(nomf1, :), qnu_of, qnu_ob, modul, ct) ! fermion at nomf1
         end do
-        call count_scfs_rec(nof, nob, 0_8, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ct) ! no more fermions
+        call count_scfs_neg_rec(nof, nob, 0_8, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ct) ! no more fermions
     else
         if (nomb == 0) return
         qnu_c = qnu_1
         do 
-            call count_scfs_rec(nof, nob, 0_8, nomb - 1, nqnu, qnu_c, qnu_of, qnu_ob, modul, ct) ! one more boson at nomb
+            call count_scfs_neg_rec(nof, nob, 0_8, nomb - 1, nqnu, qnu_c, qnu_of, qnu_ob, modul, ct) ! one more boson at nomb
             qnu_c = qnu_c - qnu_ob(nomb, :)
             do i = 1, nqnu 
                 if (modul(i) == 1 .and. qnu_c(i) < 0) return
@@ -84,7 +83,7 @@ recursive subroutine count_scfs_rec(nof, nob, nomf, nomb, nqnu, qnu_1, qnu_of, q
     end if
 end subroutine 
 
-subroutine generate_scfs(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob, modul, ncf, &
+subroutine generate_scfs_neg(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob, modul, ncf, &
     lid, rid, conff, confb, binom, num_th, disp_std)
     use omp_lib
     implicit none
@@ -123,7 +122,7 @@ subroutine generate_scfs(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob
             qnu_1 = qnu_1 - qnu_ob(j, :) * nbt(j)
         end do
         ct = lid(i + 1)
-        call generate_scfs_rec(nof, nob, norf, norb, nebm, norf, norb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ncf, &
+        call generate_scfs_neg_rec(nof, nob, norf, norb, nebm, norf, norb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ncf, &
             ct, cfft, nbt, lid, rid, conff, confb, binom)
     end do
     !$omp end do
@@ -131,7 +130,7 @@ subroutine generate_scfs(nof, nob, norf, norb, nebm, nqnu, qnu_s, qnu_of, qnu_ob
     if (disp_std == 1)  print *, 'Generating configurations finish'
 end subroutine
 
-recursive subroutine generate_scfs_rec(nof, nob, norf, norb, nebm, nomf, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ncf, &
+recursive subroutine generate_scfs_neg_rec(nof, nob, norf, norb, nebm, nomf, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ncf, &
     ct, cfft, nbt, lid, rid, conff, confb, binom)
     implicit none
     integer(8), intent(in) :: nof, nob, norf, norb, nebm, nomf, nomb, nqnu, nbt(nob), ncf, cfft
@@ -149,7 +148,6 @@ recursive subroutine generate_scfs_rec(nof, nob, norf, norb, nebm, nomf, nomb, n
         if (cyc1 == 1 .and. qnu_1(i) == 0) cycle
         if (cyc1 > 1 .and. mod(qnu_1(i), cyc1) == 0) cycle
         flag = .false.
-        if (cyc1 == 1 .and. qnu_1(i) < 0) return
     end do
     if (flag) then 
         ct = ct + 1 
@@ -165,17 +163,17 @@ recursive subroutine generate_scfs_rec(nof, nob, norf, norb, nebm, nomf, nomb, n
     
     if (nomf > 0) then 
         do nomf1 = 1, nomf
-            call generate_scfs_rec(nof, nob, norf, norb, nebm, nomf1 - 1, nomb, nqnu, qnu_1 - qnu_of(nomf1, :), &
+            call generate_scfs_neg_rec(nof, nob, norf, norb, nebm, nomf1 - 1, nomb, nqnu, qnu_1 - qnu_of(nomf1, :), &
                 qnu_of, qnu_ob, modul, ncf, ct, ibset(cfft, nomf1 - 1), nbt, lid, rid, conff, confb, binom) ! fermion at nomf1
         end do
-        call generate_scfs_rec(nof, nob, norf, norb, nebm, 0_8, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ncf, &
+        call generate_scfs_neg_rec(nof, nob, norf, norb, nebm, 0_8, nomb, nqnu, qnu_1, qnu_of, qnu_ob, modul, ncf, &
             ct, cfft, nbt, lid, rid, conff, confb, binom) ! no more fermions
     else
         if (nomb == 0) return
         qnu_c = qnu_1
         nbt_1 = nbt
         do 
-            call generate_scfs_rec(nof, nob, norf, norb, nebm, 0_8, nomb - 1, nqnu, qnu_c, qnu_of, qnu_ob, modul, ncf, &
+            call generate_scfs_neg_rec(nof, nob, norf, norb, nebm, 0_8, nomb - 1, nqnu, qnu_c, qnu_of, qnu_ob, modul, ncf, &
                 ct, cfft, nbt_1, lid, rid, conff, confb, binom)
             nbt_1(nomb) = nbt_1(nomb) + 1
             qnu_c = qnu_c - qnu_ob(nomb, :)
@@ -226,20 +224,6 @@ function decode_nb(nob, nebm, cfb, binom) result(nb)
         nb(pos) = nb(pos) + 1
         neb1 = neb1 - 1
     end do
-end function
-
-function search_scf(nof, nob, norf, norb, nebm, lid, rid, cff, nb, binom) result(i)
-    implicit none
-    integer(8), intent(in) :: nof, nob, norf, norb, nebm
-    integer(8), intent(in) :: cff, nb(nob), binom(nebm + 1, nob + 1)
-    integer(8), intent(in) :: lid(ishft(binom(nebm + 1, nob - norb + 1) + 1, nof - norf) + 1)
-    integer(8), intent(in) :: rid(ishft(binom(nebm + 1, norb + 1) + 1, norf))
-    integer(8) :: i
-    integer(8) :: li, ri 
-    li = ishft(encode_nb(nob - norb, nebm, nb(norb + 1 : nob), binom(:, 1 : nob - norb + 1)), nof - norf) &
-        + ibits(cff, norf, nof - norf) + 1
-    ri = ishft(encode_nb(norb, nebm, nb(1 : norb), binom(:, 1 : norb + 1)), norf) + ibits(cff, 0_8, norf) + 1
-    i = lid(li) + rid(ri)
 end function
 
 end
