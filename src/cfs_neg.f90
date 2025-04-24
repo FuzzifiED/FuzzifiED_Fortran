@@ -1,8 +1,8 @@
-module cfs
+module cfs_neg
     
 contains
 
-subroutine count_cfs(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, num_th, disp_std)
+subroutine count_cfs_neg(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, num_th, disp_std)
     use omp_lib
     implicit none
     integer(8), intent(in) :: no, nor, nqnu
@@ -28,7 +28,7 @@ subroutine count_cfs(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, num_th, disp_
             qnu_1 = qnu_1 - qnu_o(j, :)
         end do
         lid(i + 2) = 0
-        call count_cfs_rec(no, nor, nqnu, qnu_1, qnu_o, modul, lid(i + 2))
+        call count_cfs_neg_rec(no, nor, nqnu, qnu_1, qnu_o, modul, lid(i + 2))
     end do
     !$omp end do
     !$omp end parallel
@@ -40,7 +40,7 @@ subroutine count_cfs(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, num_th, disp_
     if (disp_std == 1) print *, 'Counting configurations finish, total number :', ncf
 end subroutine
 
-recursive subroutine count_cfs_rec(no, nom, nqnu, qnu_1, qnu_o, modul, ct)
+recursive subroutine count_cfs_neg_rec(no, nom, nqnu, qnu_1, qnu_o, modul, ct)
     implicit none
     integer(8), intent(in) :: no, nom, nqnu
     integer(8), intent(in) :: qnu_1(nqnu), qnu_o(no, nqnu), modul(nqnu)
@@ -54,15 +54,14 @@ recursive subroutine count_cfs_rec(no, nom, nqnu, qnu_1, qnu_o, modul, ct)
         if (cyc1 == 1 .and. qnu_1(i) == 0) cycle
         if (cyc1 > 1 .and. mod(qnu_1(i), cyc1) == 0) cycle
         flag = .false.
-        if (cyc1 == 1 .and. qnu_1(i) < 0) return
     end do
     if (flag) ct = ct + 1 
     do nom1 = 1, nom
-        call count_cfs_rec(no, nom1 - 1, nqnu, qnu_1 - qnu_o(nom1, :), qnu_o, modul, ct)
+        call count_cfs_neg_rec(no, nom1 - 1, nqnu, qnu_1 - qnu_o(nom1, :), qnu_o, modul, ct)
     end do
 end subroutine
 
-subroutine generate_cfs(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, rid, conf, num_th, disp_std)
+subroutine generate_cfs_neg(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, rid, conf, num_th, disp_std)
     use omp_lib
     implicit none
     integer(8), intent(in) :: no, nor, nqnu, ncf
@@ -90,14 +89,14 @@ subroutine generate_cfs(no, nor, nqnu, qnu_s, qnu_o, modul, ncf, lid, rid, conf,
             qnu_1 = qnu_1 - qnu_o(j, :)
         end do
         ct = lid(i + 1)
-        call generate_cfs_rec(no, nor, nor, nqnu, qnu_1, qnu_o, modul, ncf, ct, ishft(i, nor), lid, rid, conf)
+        call generate_cfs_neg_rec(no, nor, nor, nqnu, qnu_1, qnu_o, modul, ncf, ct, ishft(i, nor), lid, rid, conf)
     end do
     !$omp end do
     !$omp end parallel
     if (disp_std == 1)  print *, 'Generating configurations finish'
 end subroutine
 
-recursive subroutine generate_cfs_rec(no, nor, nom, nqnu, qnu_1, qnu_o, modul, ncf, ct, tmp, lid, rid, conf)
+recursive subroutine generate_cfs_neg_rec(no, nor, nom, nqnu, qnu_1, qnu_o, modul, ncf, ct, tmp, lid, rid, conf)
     implicit none
     integer(8), intent(in) :: no, nor, nom, nqnu, tmp, ncf
     integer(8), intent(in) :: qnu_1(nqnu), qnu_o(no, nqnu), modul(nqnu)
@@ -112,7 +111,6 @@ recursive subroutine generate_cfs_rec(no, nor, nom, nqnu, qnu_1, qnu_o, modul, n
         if (cyc1 == 1 .and. qnu_1(i) == 0) cycle
         if (cyc1 > 1 .and. mod(qnu_1(i), cyc1) == 0) cycle
         flag = .false.
-        if (cyc1 == 1 .and. qnu_1(i) < 0) return
     end do
     if (flag) then 
         ct = ct + 1 
@@ -124,18 +122,9 @@ recursive subroutine generate_cfs_rec(no, nor, nom, nqnu, qnu_1, qnu_o, modul, n
         end if
     end if
     do nom1 = 1, nom
-        call generate_cfs_rec(no, nor, nom1 - 1, nqnu, qnu_1 - qnu_o(nom1, :), qnu_o, &
+        call generate_cfs_neg_rec(no, nor, nom1 - 1, nqnu, qnu_1 - qnu_o(nom1, :), qnu_o, &
             modul, ncf, ct, ibset(tmp, nom1 - 1), lid, rid, conf)
     end do
 end subroutine
-
-function search_cf(no, nor, lid, rid, cf) result(i)
-    implicit none
-    integer(8), intent(in) :: no, nor
-    integer(8), intent(in) :: lid(ibset(0_8, no - nor) + 1), rid(ibset(0_8, nor))
-    integer(8), intent(in) :: cf
-    integer(8):: i
-    i = lid(ibits(cf, nor, no - nor) + 1) + rid(ibits(cf, 0_8, nor) + 1)
-end function
 
 end module
