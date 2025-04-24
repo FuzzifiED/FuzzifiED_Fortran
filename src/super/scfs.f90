@@ -64,7 +64,10 @@ recursive subroutine count_scfs_rec(nof, nob, nomf, nomb, nqnu, qnu_1, qnu_of, q
         flag = .false.
         if (cyc1 == 1 .and. qnu_1(i) < 0) return
     end do
-    if (flag) ct = ct + 1 
+    if (flag) then 
+        ct = ct + 1 
+        return
+    end if
     
     if (nomf > 0) then 
         do nomf1 = 1, nomf
@@ -156,11 +159,11 @@ recursive subroutine generate_scfs_rec(nof, nob, norf, norb, nebm, nomf, nomb, n
         conff(ct) = cfft 
         confb(ct) = encode_nb(nob, nebm, nbt, binom)
         ri = ishft(encode_nb(norb, nebm, nbt(1 : norb), binom(:, 1 : norb + 1)), norf) + ibits(cfft, 0_8, norf) + 1
-        if (rid(ri) == 0) then
-            li = ishft(encode_nb(nob - norb, nebm, nbt(norb + 1 : nob), binom(:, 1 : nob - norb + 1)), nof - norf) &
-                + ibits(cfft, norf, nof - norf) + 1
-            rid(ri) = ct - lid(li)
-        end if
+        if (rid(ri) > 0) return
+        li = ishft(encode_nb(nob - norb, nebm, nbt(norb + 1 : nob), binom(:, 1 : nob - norb + 1)), nof - norf) &
+            + ibits(cfft, norf, nof - norf) + 1
+        rid(ri) = ct - lid(li)
+        return
     end if
     
     if (nomf > 0) then 

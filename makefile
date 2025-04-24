@@ -11,8 +11,8 @@ ifeq ($(NBITS), 64)
 endif
 
 OBJS := $(SRC_DIR)/cfs.o $(SRC_DIR)/cfs_neg.o $(SRC_DIR)/bs.o $(SRC_DIR)/op.o $(SRC_DIR)/diag.o $(SRC_DIR)/diag_re.o $(SRC_DIR)/ent.o
-OBJS_SUPER := $(SUPER_DIR)/scfs.o $(SUPER_DIR)/scfs_neg.o $(SUPER_DIR)/sbs.o $(SUPER_DIR)/sop.o $(SUPER_DIR)/sent.o
-MODS := cfs.mod cfs_neg.mod bs.mod op.mod diag.mod diag_re.mod ent.mod scfs.mod scfs_neg.mod sbs.mod sop.mod sent.mod
+OBJS_SUPER := $(SUPER_DIR)/scfs.o $(SUPER_DIR)/sbs.o $(SUPER_DIR)/sop.o $(SUPER_DIR)/sent.o
+MODS := cfs.mod cfs_neg.mod bs.mod op.mod diag.mod diag_re.mod ent.mod scfs.mod sbs.mod sop.mod sent.mod
 
 .PHONY: all clean cleantmp libfuzzified libfuzzifino
 
