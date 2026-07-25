@@ -101,8 +101,8 @@ subroutine action_strs(nof, nob, norf, norb, &
 
     allocate(id_f(ncf_d))
     allocate(phase(ncf_d))
-    call generate_strs(nof, nob, norf, norb, nebm_d, ncf_d, lid_d, rid_d, conff_d, confb_d, & 
-        perm_of, perm_ob, ph_of, fac_of, fac_ob, id_f, phase, binom_d, num_th)
+    call generate_strs(nof, nob, norf, norb, nebm_f, ncf_d, lid_f, rid_f, conff_d, confb_d, & 
+        perm_of, perm_ob, ph_of, fac_of, fac_ob, id_f, phase, binom_f, num_th)
 
     call omp_set_num_threads(num_th)
     st_f = 0
