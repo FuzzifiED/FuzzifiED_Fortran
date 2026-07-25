@@ -3,7 +3,8 @@
 using BinaryBuilder, Pkg
 
 name = "FuzzifiED"
-version = v"1.0.0"
+version = v"1.2.3"
+ENV["BINARYBUILDER_AUTOMATIC_APPLE"] = "true"
 
 # Collection of sources required to complete build
 sources = [
