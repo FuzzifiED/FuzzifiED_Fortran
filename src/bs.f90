@@ -83,7 +83,7 @@ subroutine action_trs(no, nor, &
 
     allocate(id_f(ncf_d))
     allocate(phase(ncf_d))
-    call generate_trs(no, nor, ncf_d, lid_d, rid_d, conf_d, perm_o, ph_o, fac_o, id_f, phase, num_th)
+    call generate_trs(no, nor, ncf_d, lid_f, rid_f, conf_d, perm_o, ph_o, fac_o, id_f, phase, num_th)
 
     call omp_set_num_threads(num_th)
     st_f = 0
