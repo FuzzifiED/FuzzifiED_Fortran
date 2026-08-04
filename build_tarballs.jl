@@ -1,14 +1,15 @@
 # Note that this script can accept some limited command-line arguments, run
 # `julia build_tarballs.jl --help` to see a usage message.
+# ~/Téléchargements/julia-1.7.3/bin/julia build_tarballs.jl --verbose --deploy="FuzzifiED/FuzzifiED_jll.jl"
 using BinaryBuilder, Pkg
 
 name = "FuzzifiED"
-version = v"1.2.3"
+version = v"1.2.4"
 ENV["BINARYBUILDER_AUTOMATIC_APPLE"] = "true"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/FuzzifiED/FuzzifiED_Fortran.git", "a81b1fa6b1560ab0046ec139dec0d0d355e56b34")
+    GitSource("https://github.com/FuzzifiED/FuzzifiED_Fortran.git", "230965d0a340f7c3057b8f7de4c94e2a15026cae")
 ]
 
 # Bash recipe for building across all platforms

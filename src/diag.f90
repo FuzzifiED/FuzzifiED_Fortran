@@ -168,7 +168,7 @@ subroutine full_matrix(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, mat, num_
             mat(i1, i) = val
             if (sym_q == 0 .or. i == i1) cycle 
             if (sym_q == 1) val = conjg(val)
-            mat(i, i1) = val
+            mat1(i, i1) = val
         end do
     end do
     !$omp end do
