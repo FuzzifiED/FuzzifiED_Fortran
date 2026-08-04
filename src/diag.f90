@@ -8,7 +8,7 @@ subroutine vec_prod(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, st_d, st_f, 
     integer(8), intent(in) :: dim_d, dim_f, sym_q, nel
     integer(8), intent(in) :: colptr(dim_d + 1), rowid(nel)
     complex(8), intent(in) :: elval(nel), st_d(dim_d) 
-    complex(8) :: st_f(dim_f)
+    complex(8), intent(out) :: st_f(dim_f)
     complex(8) :: val
     complex(8), allocatable :: st_f1(:)
     integer(8) :: i, j, i1
@@ -28,6 +28,42 @@ subroutine vec_prod(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, st_d, st_f, 
             if (sym_q == 0 .or. i == i1) cycle 
             if (sym_q == 1) val = conjg(val)
             st_f1(i) = st_f1(i) + val * st_d(i1)
+        end do
+    end do
+    !$omp end do
+    !$omp critical 
+    st_f = st_f + st_f1 
+    !$omp end critical
+    deallocate(st_f1)
+    !$omp end parallel
+end subroutine
+
+subroutine vec_mat_prod(dim_d, dim_f, nst, sym_q, nel, colptr, rowid, elval, st_d, st_f, num_th)
+    use omp_lib 
+    implicit none 
+    integer(8), intent(in) :: dim_d, dim_f, nst, sym_q, nel
+    integer(8), intent(in) :: colptr(dim_d + 1), rowid(nel)
+    complex(8), intent(in) :: elval(nel), st_d(dim_d, nst) 
+    complex(8), intent(out) :: st_f(dim_f, nst)
+    complex(8) :: val
+    complex(8), allocatable :: st_f1(:, :)
+    integer(8) :: i, j, i1
+    integer(8), intent(in) :: num_th 
+
+    call omp_set_num_threads(num_th)
+    st_f = 0
+    !$omp parallel shared(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, st_d, st_f) private(st_f1, i, j, i1, val)
+    allocate(st_f1(dim_f, nst))
+    st_f1 = 0 
+    !$omp do 
+    do i = 1, dim_d
+        do j = colptr(i), colptr(i + 1) - 1
+            i1 = rowid(j)
+            val = elval(j)
+            st_f1(i1, :) = st_f1(i1, :) + val * st_d(i, :)
+            if (sym_q == 0 .or. i == i1) cycle 
+            if (sym_q == 1) val = conjg(val)
+            st_f1(i, :) = st_f1(i, :) + val * st_d(i1, :)
         end do
     end do
     !$omp end do
@@ -69,6 +105,75 @@ subroutine scal_prod(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, st_d, st_f,
     prod = prod + prod1
     !$omp end critical
     !$omp end parallel
+end subroutine
+
+subroutine scal_mat_prod(dim_d, nst_d, dim_f, nst_f, sym_q, nel, colptr, rowid, elval, st_d, st_f, prod, num_th)
+    use omp_lib 
+    implicit none 
+    integer(8), intent(in) :: dim_d, nst_d, dim_f, nst_f, sym_q, nel
+    integer(8), intent(in) :: colptr(dim_d + 1), rowid(nel)
+    complex(8), intent(in) :: elval(nel), st_d(dim_d, nst_d), st_f(dim_f, nst_f)
+    complex(8), intent(out) :: prod(nst_f, nst_d)
+    complex(8) :: prod1(nst_f, nst_d), val
+    integer(8) :: i, j, i1, jst
+    integer(8), intent(in) :: num_th 
+
+    call omp_set_num_threads(num_th)
+    prod = 0
+    !$omp parallel shared(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, st_d, st_f, prod) private(prod1, i, j, i1, jst, val)
+    prod1 = 0 
+    !$omp do 
+    do i = 1, dim_d
+        do j = colptr(i), colptr(i + 1) - 1
+            i1 = rowid(j)
+            val = elval(j)
+            do jst = 1, nst_d
+                prod1(:, jst) = prod1(:, jst) + conjg(st_f(i1, :)) * val * st_d(i, jst)
+            end do
+            if (sym_q == 0 .or. i == i1) cycle 
+            if (sym_q == 1) val = conjg(val)
+            do jst = 1, nst_d
+                prod1(:, jst) = prod1(:, jst) + conjg(st_f(i, :)) * val * st_d(i1, jst)
+            end do
+        end do
+    end do
+    !$omp end do
+    !$omp critical 
+    prod = prod + prod1
+    !$omp end critical
+    !$omp end parallel
+end subroutine
+
+subroutine full_matrix(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, mat, num_th)
+    use omp_lib 
+    implicit none 
+    integer(8), intent(in) :: dim_d, dim_f, sym_q, nel
+    integer(8), intent(in) :: colptr(dim_d + 1), rowid(nel)
+    complex(8), intent(in) :: elval(nel)
+    complex(8) :: mat(dim_f, dim_d)
+    complex(8) :: mat1(dim_f, dim_d)
+    complex(8) :: val
+    integer(8) :: i, j, i1
+    integer(8), intent(in) :: num_th 
+
+    call omp_set_num_threads(num_th)
+    mat = 0
+    if (sym_q /= 0) mat1 = 0
+    !$omp parallel shared(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, mat, mat1) private(i, j, i1, val)
+    !$omp do 
+    do i = 1, dim_d
+        do j = colptr(i), colptr(i + 1) - 1
+            i1 = rowid(j)
+            val = elval(j)
+            mat(i1, i) = val
+            if (sym_q == 0 .or. i == i1) cycle 
+            if (sym_q == 1) val = conjg(val)
+            mat(i, i1) = val
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+    if (sym_q /= 0) mat = mat + mat1 
 end subroutine
 
 subroutine diagonalisation(dim, sym_q, nel, colptr, rowid, elval, nst, tol, ncv_in, eigval, eigvec, num_th, disp_std)
