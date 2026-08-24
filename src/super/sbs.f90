@@ -166,8 +166,8 @@ subroutine action_strs_mat(nof, nob, norf, norb, &
     integer(8), intent(in) :: perm_of(nof), perm_ob(nob), ph_of(nof)
     complex(8), intent(in) :: fac_of(nof), fac_ob(nob)
     
-    complex(8), intent(in) :: st_d(nst, dim_d)
-    complex(8), intent(out) :: st_f(nst, dim_f)
+    complex(8), intent(in) :: st_d(dim_d, nst)
+    complex(8), intent(out) :: st_f(dim_f, nst)
     integer(8), intent(in) :: num_th 
     integer(8), allocatable :: id_f(:)
     complex(8), allocatable :: st_f1(:, :), phase(:)
@@ -187,7 +187,7 @@ subroutine action_strs_mat(nof, nob, norf, norb, &
     !$omp& shared(nebm_f, ncf_f, dim_f, conff_f, confb_f, lid_f, rid_f, szz_f, cfgr_f, cffac_f, grel_f, grsz_f, binom_f), &
     !$omp& shared(perm_of, perm_ob, ph_of, fac_of, fac_ob, st_d, st_f, id_f, phase, nst), & 
     !$omp& private(g, g1, e, i, i1, mult, val, fac, fac1, st_f1)
-    allocate(st_f1(nst, dim_f))
+    allocate(st_f1(dim_f, nst))
     st_f1 = 0
     !$omp do
     do g = 1, dim_d

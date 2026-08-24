@@ -139,8 +139,8 @@ subroutine action_trs_mat(no, nor, &
     integer(8), intent(in) :: perm_o(no), ph_o(no)
     complex(8), intent(in) :: fac_o(no)
 
-    complex(8), intent(in) :: st_d(nst, dim_d)
-    complex(8), intent(out) :: st_f(nst, dim_f)
+    complex(8), intent(in) :: st_d(dim_d, nst)
+    complex(8), intent(out) :: st_f(dim_f, nst)
     integer(8), allocatable :: id_f(:)
     complex(8), allocatable :: st_f1(:, :), phase(:)
 
@@ -158,7 +158,7 @@ subroutine action_trs_mat(no, nor, &
     !$omp parallel shared(no, nor, nst, ncf_d, dim_d, conf_d, lid_d, rid_d, szz_d, cfgr_d, cffac_d, grel_d, grsz_d, ncf_f), &
     !$omp& shared(dim_f, conf_f, lid_f, rid_f, szz_f, cfgr_f, cffac_f, grel_f, grsz_f, perm_o, ph_o, fac_o, st_d, st_f), &
     !$omp& shared(id_f, phase) private(g, g1, e, i, i1, val, fac, fac1, st_f1, mult)
-    allocate(st_f1(nst, dim_f))
+    allocate(st_f1(dim_f, nst))
     st_f1 = 0
     !$omp do
     do g = 1, dim_d
