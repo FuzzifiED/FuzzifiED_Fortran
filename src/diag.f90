@@ -114,14 +114,16 @@ subroutine scal_mat_prod(dim_d, nst_d, dim_f, nst_f, sym_q, nel, colptr, rowid, 
     integer(8), intent(in) :: colptr(dim_d + 1), rowid(nel)
     complex(8), intent(in) :: elval(nel), st_d(dim_d, nst_d), st_f(dim_f, nst_f)
     complex(8), intent(out) :: prod(nst_f, nst_d)
-    complex(8) :: prod1(nst_f, nst_d), val
+    complex(8) :: val
+    complex(8), allocatable :: prod1(:, :)
     integer(8) :: i, j, i1, jst
     integer(8), intent(in) :: num_th 
 
     call omp_set_num_threads(num_th)
     prod = 0
     !$omp parallel shared(dim_d, dim_f, sym_q, nel, colptr, rowid, elval, st_d, st_f, prod) private(prod1, i, j, i1, jst, val)
-    prod1 = 0 
+    allocate(prod1(nst_f, nst_d))
+    prod1 = 0
     !$omp do 
     do i = 1, dim_d
         do j = colptr(i), colptr(i + 1) - 1
@@ -141,6 +143,7 @@ subroutine scal_mat_prod(dim_d, nst_d, dim_f, nst_f, sym_q, nel, colptr, rowid, 
     !$omp critical 
     prod = prod + prod1
     !$omp end critical
+    deallocate(prod1)
     !$omp end parallel
 end subroutine
 

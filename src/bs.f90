@@ -118,6 +118,74 @@ subroutine action_trs(no, nor, &
     deallocate(phase)
 end subroutine
 
+subroutine action_trs_mat(no, nor, &
+    ncf_d, dim_d, conf_d, lid_d, rid_d, szz_d, cfgr_d, cffac_d, grel_d, grsz_d, &
+    ncf_f, dim_f, conf_f, lid_f, rid_f, szz_f, cfgr_f, cffac_f, grel_f, grsz_f, &
+    perm_o, ph_o, fac_o, nst, st_d, st_f, num_th)
+    use omp_lib
+    implicit none
+    integer(8), intent(in) :: no, nor, nst 
+
+    integer(8), intent(in) :: ncf_d, dim_d, szz_d
+    integer(8), intent(in) :: conf_d(ncf_d), lid_d(ibset(0_8, no - nor)), rid_d(ibset(0_8, nor))
+    integer(8), intent(in) :: cfgr_d(ncf_d), grel_d(szz_d, dim_d), grsz_d(dim_d)
+    complex(8), intent(in) :: cffac_d(ncf_d)
+
+    integer(8), intent(in) :: ncf_f, dim_f, szz_f
+    integer(8), intent(in) :: conf_f(ncf_f), lid_f(ibset(0_8, no - nor) + 1), rid_f(ibset(0_8, nor))
+    integer(8), intent(in) :: cfgr_f(ncf_f), grel_f(szz_f, dim_f), grsz_f(dim_f)
+    complex(8), intent(in) :: cffac_f(ncf_f)
+
+    integer(8), intent(in) :: perm_o(no), ph_o(no)
+    complex(8), intent(in) :: fac_o(no)
+
+    complex(8), intent(in) :: st_d(nst, dim_d)
+    complex(8), intent(out) :: st_f(nst, dim_f)
+    integer(8), allocatable :: id_f(:)
+    complex(8), allocatable :: st_f1(:, :), phase(:)
+
+    integer(8), intent(in) :: num_th 
+
+    integer(8) :: e, g, g1, i, i1, mult
+    complex(8) :: val, fac, fac1
+
+    allocate(id_f(ncf_d))
+    allocate(phase(ncf_d))
+    call generate_trs(no, nor, ncf_d, lid_f, rid_f, conf_d, perm_o, ph_o, fac_o, id_f, phase, num_th)
+
+    call omp_set_num_threads(num_th)
+    st_f = 0
+    !$omp parallel shared(no, nor, nst, ncf_d, dim_d, conf_d, lid_d, rid_d, szz_d, cfgr_d, cffac_d, grel_d, grsz_d, ncf_f), &
+    !$omp& shared(dim_f, conf_f, lid_f, rid_f, szz_f, cfgr_f, cffac_f, grel_f, grsz_f, perm_o, ph_o, fac_o, st_d, st_f), &
+    !$omp& shared(id_f, phase) private(g, g1, e, i, i1, val, fac, fac1, st_f1, mult)
+    allocate(st_f1(nst, dim_f))
+    st_f1 = 0
+    !$omp do
+    do g = 1, dim_d
+        mult = grsz_d(g)
+        do e = 1, mult
+            i = grel_d(e, g)
+            if (i == -1) cycle
+            i1 = id_f(i)
+            val = phase(i)
+            fac = cffac_d(i)
+
+            g1 = cfgr_f(i1)
+            if (g1 == -1) cycle
+            fac1 = cffac_f(i1)
+            st_f1(:, g1) = st_f1(:, g1) + st_d(:, g) * val * conjg(fac1) * fac
+        end do
+    end do
+    !$omp end do 
+    !$omp critical 
+    st_f = st_f + st_f1 
+    !$omp end critical
+    deallocate(st_f1)
+    !$omp end parallel
+    deallocate(id_f)
+    deallocate(phase)
+end subroutine
+
 subroutine generate_bs_cfgr(no, nor, ncf, lid, rid, conf, nqnz, qnz_s, cyc, perm_o, ph_o, fac_o, szz, dim, cfgr, cffac, &
         num_th, disp_std)
     implicit none
