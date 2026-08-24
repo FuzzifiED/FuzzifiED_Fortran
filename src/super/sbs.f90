@@ -202,7 +202,7 @@ subroutine action_strs_mat(nof, nob, norf, norb, &
             g1 = cfgr_f(i1)
             if (g1 == -1) cycle
             fac1 = cffac_f(i1)
-            st_f1(:, g1) = st_f1(:, g1) + st_d(:, g) * val * conjg(fac1) * fac
+            st_f1(g1, :) = st_f1(g1, :) + st_d(g, :) * val * conjg(fac1) * fac
         end do
     end do
     !$omp end do 
